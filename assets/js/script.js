@@ -1,12 +1,9 @@
 const cityInputEl = document.getElementById("city-input");
 const searchedEl = document.getElementById("searched-cities");
 const todayEl = document.getElementById("today");
+const cityInputText = document.getElementById("city");
 
-const requestUrlCity = `http://api.openweathermap.org/geo/1.0/direct?q=${city}&limit=5&appid=cfc92c00896dc6d5d2449b9d8d8bca12`;
-
-const api5day = `http://api.openweathermap.org/geo/1.0/direct?q=${city}&limit=5&appid=cfc92c00896dc6d5d2449b9d8d8bca12`;
-
-const responseText = document.getElementById("response-text");
+let buttonCheck = true;
 
 function getCityWeather(city) {
   fetch(
@@ -26,6 +23,8 @@ function getCityWeather(city) {
       console.log(`Lon: ${cityLon}`);
 
       get5DayForecast(cityLat, cityLon);
+
+      cityInputText.value = "";
     });
 }
 
@@ -47,6 +46,7 @@ function get5DayForecast(cityLat, cityLon) {
       for (let i = 0; i < data.list.length; i++) {
         const item = data.list[i];
         const date = dayjs.unix(item.dt).format("M/DD/YYYY");
+        let time = dayjs.unix(item.dt).format("HH:MM");
 
         // Check if the date already exists in the dailyForecast object
         if (!datesProcessed.includes(date)) {
@@ -63,7 +63,9 @@ function get5DayForecast(cityLat, cityLon) {
         }
       }
 
-      updateTodaysWeather(
+      todayEl.innerHTML = "";
+
+      createTodaysWeather(
         cityName,
         dailyForecast[0].date,
         dailyForecast[0].icon,
@@ -72,30 +74,30 @@ function get5DayForecast(cityLat, cityLon) {
         dailyForecast[0].humidity
       );
 
-      console.log(dailyForecast);
-      console.log(dailyForecast[0].date);
+      createFiveDays(dailyForecast);
 
-      createSearchedButton(cityName);
+      if (buttonCheck) {
+        createSearchedButton(cityName);
+      }
+
+      buttonCheck = true;
     });
-}
-
-function init() {
-  const searchedLocations = JSON.parse(localStorage.getItem("locations")) || {};
-
-  if (searchedLocations.length === 0) {
-    return;
-  }
-
-  // for (const location of searchedLocations) {
-  // }
 }
 
 function createSearchedButton(cityName) {
   const searchedCity = document.createElement("button");
   searchedCity.setAttribute("class", "btn btn-secondary w-100 mt-2 mb-2");
-  searchedCity.setAttribute("id", "searchedCityButton");
+  searchedCity.setAttribute("id", `${cityName}`);
   searchedCity.textContent = cityName;
   searchedEl.appendChild(searchedCity);
+
+  searchedCity.addEventListener("click", function (event) {
+    event.preventDefault();
+
+    getCityWeather(cityName);
+
+    buttonCheck = false;
+  });
 }
 
 function createTodaysWeather(cityName, date, icon, temp, wind, humidity) {
@@ -132,21 +134,58 @@ function createTodaysWeather(cityName, date, icon, temp, wind, humidity) {
   todayEl.appendChild(todayCityDiv);
 }
 
-// clear the contents of 'todayCityDiv' and then recreates it.
-function updateTodaysWeather(cityName, date, icon, temp, wind, humidity) {
-  // Check if 'todayCityDiv' exists, if so, clear it.
-  const todayCityDiv = document.getElementById("city-and-date");
-  if (todayCityDiv) {
-    todayCityDiv.innerHTML = ""; // Clear existing content
+function createFiveDays(dailyForecast) {
+  let fiveDaysRow = document.createElement("div");
+  fiveDaysRow.setAttribute("class", "row");
+
+  let p = document.createElement("p");
+  p.setAttribute("class", "h3");
+  p.textContent = "5-Day Forecast";
+  fiveDaysRow.appendChild(p);
+
+  let fiveDaysRow2 = document.createElement("div");
+  fiveDaysRow2.setAttribute("class", "row");
+
+  todayEl.appendChild(fiveDaysRow);
+  todayEl.appendChild(fiveDaysRow2);
+
+  for (let i = 1; i < 6; i++) {
+    let weather = dailyForecast[i];
+
+    let divv = document.createElement("div");
+    divv.setAttribute("class", "col bg-dark text-light mx-2 py-2");
+
+    let p1 = document.createElement("p");
+    p1.setAttribute("class", "h4");
+    p1.textContent = weather.date;
+
+    let img = document.createElement("img");
+    img.setAttribute(
+      "src",
+      `http://openweathermap.org/img/wn/${weather.icon}@2x.png`
+    );
+
+    let p2 = document.createElement("p");
+    p2.textContent = `Temp: ${weather.temp}`;
+    p2.setAttribute("class", "h5");
+
+    let p3 = document.createElement("p");
+    p3.textContent = `Wind: ${weather.wind}`;
+    p3.setAttribute("class", "h5");
+
+    let p4 = document.createElement("p");
+    p4.textContent = `Humidity: ${weather.humidity}`;
+    p4.setAttribute("class", "h5");
+
+    divv.appendChild(p1);
+    divv.appendChild(img);
+    divv.appendChild(p2);
+    divv.appendChild(p3);
+    divv.appendChild(p4);
+
+    fiveDaysRow2.appendChild(divv);
   }
-
-  // Now that 'todayCityDiv' is cleared, recreate the weather details
-  createTodaysWeather(cityName, date, icon, temp, wind, humidity);
 }
-
-// init();
-
-// getApi(requestUrlCity);
 
 cityInputEl.addEventListener("submit", function (event) {
   event.preventDefault();

@@ -5,6 +5,8 @@ const cityInputText = document.getElementById("city");
 
 let buttonCheck = true;
 
+let cities = [];
+
 function getCityWeather(city) {
   fetch(
     `http://api.openweathermap.org/geo/1.0/direct?q=${city}&limit=5&appid=cfc92c00896dc6d5d2449b9d8d8bca12`
@@ -91,6 +93,13 @@ function createSearchedButton(cityName) {
   searchedCity.textContent = cityName;
   searchedEl.appendChild(searchedCity);
 
+  // Add city to the array if it's not already included
+  if (!cities.includes(cityName)) {
+    cities.push(cityName);
+    // Update local storage with the new array
+    localStorage.setItem("cities", JSON.stringify(cities));
+  }
+
   searchedCity.addEventListener("click", function (event) {
     event.preventDefault();
 
@@ -166,15 +175,15 @@ function createFiveDays(dailyForecast) {
     );
 
     let p2 = document.createElement("p");
-    p2.textContent = `Temp: ${weather.temp}`;
+    p2.textContent = `Temp: ${weather.temp}°F`;
     p2.setAttribute("class", "h5");
 
     let p3 = document.createElement("p");
-    p3.textContent = `Wind: ${weather.wind}`;
+    p3.textContent = `Wind: ${weather.wind} miles/hour`;
     p3.setAttribute("class", "h5");
 
     let p4 = document.createElement("p");
-    p4.textContent = `Humidity: ${weather.humidity}`;
+    p4.textContent = `Humidity: ${weather.humidity}%`;
     p4.setAttribute("class", "h5");
 
     divv.appendChild(p1);
@@ -192,5 +201,20 @@ cityInputEl.addEventListener("submit", function (event) {
 
   let city = document.getElementById("city").value;
 
+  if (!city) {
+    window.alert("Please enter a city.");
+    return;
+  }
+
   getCityWeather(city);
 });
+
+function init() {
+  const storedCities = JSON.parse(localStorage.getItem("cities"));
+
+  for (city of storedCities) {
+    createSearchedButton(city);
+  }
+}
+
+init();

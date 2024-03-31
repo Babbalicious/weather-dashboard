@@ -1,0 +1,18 @@
+header {
+  background-image: linear-gradient(
+    to right,
+    rgb(105, 105, 191),
+    rgb(6, 6, 79)
+  );
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  font-weight: bold;
+}
+
+#city-and-date {
+  border: 2px solid;
+}
+
+img {
+  max-width: 50px;
+  max-height: 50px;
+}

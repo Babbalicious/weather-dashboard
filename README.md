@@ -10,7 +10,7 @@ The app uses local storage in the browser to remember what cities have been sear
 
 ## Screenshot
 
-![Application Screenshot](./assets/images/screenshot.png)
+![Application Screenshot](./assets/images/Screenshot.png)
 
 ## Contact Me
 
